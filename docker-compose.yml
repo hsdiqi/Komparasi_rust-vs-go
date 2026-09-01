@@ -1,0 +1,58 @@
+services:
+  postgres:
+    image: postgres:18.1-alpine
+    container_name: perf-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: perf_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend-golang-gin/migrations/001_create_products.sql:/docker-entrypoint-initdb.d/001_create_products.sql:ro
+    networks:
+      - perf-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d perf_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend-golang-gin:
+    build: ./backend-golang-gin
+    container_name: backend-golang-gin
+    environment:
+      APP_PORT: 8080
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/perf_db?sslmode=disable
+      DB_MAX_OPEN_CONNS: 25
+      DB_MAX_IDLE_CONNS: 25
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - perf-net
+
+  backend-rust-actix:
+    build: ./backend-rust-actix
+    container_name: backend-rust-actix
+    environment:
+      APP_PORT: 8081
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/perf_db?sslmode=disable
+      DB_MAX_CONNECTIONS: 25
+    ports:
+      - "8081:8081"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - perf-net
+
+volumes:
+  postgres_data:
+
+networks:
+  perf-net:
+    driver: bridge

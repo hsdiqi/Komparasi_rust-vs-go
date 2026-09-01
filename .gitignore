@@ -1,0 +1,37 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Logs and temp files
+*.log
+*.tmp
+tmp/
+temp/
+
+# Go project
+backend-golang-gin/bin/
+backend-golang-gin/*.exe
+backend-golang-gin/*.test
+backend-golang-gin/*.out
+backend-golang-gin/*.cover
+backend-golang-gin/coverage.out
+
+# Rust project
+backend-rust-actix/target/
+
+# General build output
+**/bin/
+**/dist/
+**/build/
+**/coverage/
